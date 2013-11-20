@@ -1,6 +1,10 @@
-# sublime-snippet-destroyer [![Build status](https://travis-ci.org/twolfson/sublime-snippet-destroyer.png?branch=master)](https://travis-ci.org/twolfson/sublime-snippet-destroyer)
+# sublime-snippet-destroyer
 
-Destroy all Sublime Text snippets
+Destroy all [Sublime Text][] snippets.
+
+[Sublime Text]: http://sublimetext.com/
+
+This was created out of frustration while using `Tab`. `sublime-snippet-destroyer` does not aim to allow for restoration of snippets. If we started doing that, then we should make a full-fledged snippet manager.
 
 ## Getting Started
 Install the module with: `npm install sublime-snippet-destroyer`
