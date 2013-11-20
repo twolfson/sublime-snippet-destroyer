@@ -37,4 +37,7 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         if index == 2:
             snippets = self.get_snippets()
             for filepath in snippets:
-                print filepath
+                os.unlink(filepath)
+            sublime.active_window().show_quick_panel(
+                ['%d snippets were destroyed.' % len(snippets)], noop)
+
