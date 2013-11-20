@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "Destroy all snippets!!",
+        "command": "snippet_destroyer_delete_all"
+    }
+]
