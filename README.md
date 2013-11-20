@@ -1,6 +1,6 @@
 # sublime-snippet-destroyer
 
-Destroy all [Sublime Text][] snippets.
+Destroy all [Sublime Text][] completions and snippets.
 
 [Sublime Text]: http://sublimetext.com/
 

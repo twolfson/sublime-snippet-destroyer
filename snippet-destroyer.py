@@ -8,15 +8,18 @@ def noop(*args, **kwargs):
 
 class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
     def get_snippets(self):
-        """Collect all .tmSnippet and .sublime-snippet files in Sublime Text's Packages folder"""
+        """Collect all .sublime-snippet, .sublime-completions, and .tmSnippet files in Sublime Text's Packages folder"""
         package_dir = sublime.packages_path()
-        tm_snippet_glob = os.path.join(package_dir, '**/*.tmSnippet')
         sublime_snippet_glob = os.path.join(package_dir, '**/*.sublime-snippet')
-        snippets = glob.glob(sublime_snippet_glob) + glob.glob(tm_snippet_glob)
+        sublime_completions_glob = os.path.join(package_dir, '**/*.sublime-completions')
+        tm_snippet_glob = os.path.join(package_dir, '**/*.tmSnippet')
+        snippets = (glob.glob(sublime_snippet_glob) +
+                    glob.glob(sublime_completions_glob) +
+                    glob.glob(tm_snippet_glob))
         return snippets
 
     def run(self):
-        """Destroy every .tmSnippet and .sublime-snippet file in Sublime Text's Packages folder"""
+        """Destroy every .sublime-snippet, .sublime-completions, and .tmSnippet file in Sublime Text's Packages folder"""
         # Find all of our snippets
         snippets = self.get_snippets()
 
