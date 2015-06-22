@@ -40,9 +40,14 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         if index == 2:
             snippets = self.get_snippets()
             for filepath in snippets:
-                # Overwrite it with a blank file
-                with open(filepath, 'w'):
-                    pass
+                # If the file is a tmSnippet, remove it (prevents XML complaints)
+                if filepath.endswith('.tmSnippet'):
+                    os.unlink(filepath)
+                # Otherwise, replace it with a blank file (takes care of overrides for `Default` packages)
+                #   e.g. `fun` -> `function` for JavaScript
+                else:
+                    with open(filepath, 'w'):
+                        pass
             sublime.active_window().show_quick_panel(
                 ['%d snippets were destroyed.' % len(snippets)], noop)
 
