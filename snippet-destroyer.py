@@ -1,5 +1,6 @@
 # Load in our dependencies
 from __future__ import print_function
+import glob
 import os
 import sublime
 import sublime_plugin
@@ -18,14 +19,14 @@ TM_SNIPPET_EXT = '.tmSnippet'
 
 
 # Define our plugin helpers
-def find_resources(glob):
+def find_resources(resource_glob):
     # If we have Sublime's find_resources, then use it
     if hasattr(sublime, 'find_resources'):
-        return sublime.find_resources(glob)
+        return sublime.find_resources(resource_glob)
     # Otherwise, we are on Sublime Text 2 which uses directories
-    #   so let's search them via `glob`
+    #   so let's search them via `resource_glob`
     else:
-        packages_glob = os.path.join(sublime.packages_path(), '**', glob)
+        packages_glob = os.path.join(sublime.packages_path(), '**', resource_glob)
         return glob.glob(packages_glob)
 
 
