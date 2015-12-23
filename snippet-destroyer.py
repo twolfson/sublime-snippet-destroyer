@@ -7,14 +7,6 @@ import sublime_plugin
 
 
 # Define our constants
-EMPTY_TM_SNIPPET = '\n'.join([
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">',
-    '<plist version="1.0">',
-    '<dict>',
-    '</dict>',
-    '</plist>',
-])
 SUBLIME_SNIPPET_EXT = '.sublime-snippet'
 TM_SNIPPET_EXT = '.tmSnippet'
 
@@ -47,11 +39,13 @@ def is_destroyed_snippet(filepath):
     if os.path.getsize(filepath) == 0:
         return True
 
-    # Otherwise, if it's a snippet and its content are our empty content, then it's destroy
-    if filepath.endswith(TM_SNIPPET_EXT):
-        with open(filepath, 'r') as file:
-            if file.read() == EMPTY_TM_SNIPPET:
-                return True
+    # Otherwise, if it's a `.tmSnippet`, we are on ST3, and it's folder has been created, then it's destroyed
+    # DEV: When we create an "empty" plist file, this doesn't delete the `tmSnippet`
+    #   However, making an empty directory magically does
+    if (filepath.endswith(TM_SNIPPET_EXT) and
+            hasattr(sublime, 'find_resources') and
+            os.path.exists(os.path.dirname(filepath))):
+        return True
 
     # Otherwise, it's not a destroyed snippet
     return False
@@ -110,24 +104,33 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
             for filepath in snippets:
                 # If this is a Sublime Text snippet and we are in Sublime Text 2, then delete the file
                 # DEV: We must delete the file since empty content nor useless XML raise alerts in Sublime Text 2
-                if filepath.endswith(SUBLIME_SNIPPET_EXT) and not hasattr(sublime, 'find_resources'):
+                is_sublime_text_2 = not hasattr(sublime, 'find_resources')
+                if filepath.endswith(SUBLIME_SNIPPET_EXT) and is_sublime_text_2:
                     os.unlink(filepath)
                     continue
 
-                # Determine override content for the snippet
-                # DEV: We need ot use XML for `.tmSnippet` to avoid XML and snippet complaints
-                content = ''
+                # If this is a `.tmSnippet`
+                dirpath = os.path.dirname(filepath)
                 if filepath.endswith(TM_SNIPPET_EXT):
-                    content = EMPTY_TM_SNIPPET
+                    # If we are in Sublime Text 2, remove it
+                    # DEV: This works for Sublime Text 2 since we are editing the package's files
+                    if is_sublime_text_2:
+                        os.unlink(filepath)
+                        continue
+                    # Otherwise, create a direcotry
+                    # DEV: On Sublime Text 3, an "empty" plist lets the snippet persist but an empty directory doesn't
+                    else:
+                        if not os.path.isdir(dirpath):
+                            os.makedirs(dirpath)
+                            continue
 
                 # If there is no directory, then create it
-                dirpath = os.path.dirname(filepath)
                 if not os.path.isdir(dirpath):
                     os.makedirs(dirpath)
 
                 # Output our new file (takes care of overrides for `Default` packages)
                 #   e.g. `fun` -> `function` for JavaScript
-                with open(filepath, 'w') as file:
-                    file.write(content)
+                with open(filepath, 'w'):
+                    pass
             sublime.active_window().show_quick_panel(
                 ['%d snippets were destroyed.' % len(snippets)], noop)
