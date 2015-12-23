@@ -14,13 +14,41 @@ EMPTY_TM_SNIPPET = '\n'.join([
     '</dict>',
     '</plist>',
 ])
+TM_SNIPPET_EXT = '.tmSnippet'
 
 
-# Define our plugin
+# Define our plugin helpers
+def is_destroyed_snippet(filepath):
+    """
+    Determine is a file is a destroyed snippet or not
+
+    :param str filepath: Absolute path to our file
+    :return: Indicator if the file is a destroyed snippet (true if it is, false otherwise)
+    :rtype: bool
+    """
+    # If the override file doesn't exist, then it's not overridden
+    if not os.path.exists(filepath):
+        return False
+
+    # If the file is empty, then it's definitely destroyed
+    if os.path.getsize(filepath) == 0:
+        return True
+
+    # Otherwise, if it's a snippet and its content are our empty content, then it's destroy
+    if filepath.endswith(TM_SNIPPET_EXT):
+        with open(filepath, 'r') as file:
+            if file.read() == EMPTY_TM_SNIPPET:
+                return True
+
+    # Otherwise, it's not a destroyed snippet
+    return False
+
+
 def noop(*args, **kwargs):
     pass
 
 
+# Define our plugin
 class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
     def get_snippets(self):
         """Collect all .sublime-snippet, .sublime-completions, and .tmSnippet files in Packages folder"""
@@ -38,6 +66,9 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
             os.path.join(sublime.packages_path(), os.path.join('..', relative_snippet))
             for relative_snippet in relative_snippets
         ]
+
+        # Filter out snippets that are destroyed
+        absolute_snippets = [filepath for filepath in absolute_snippets if not is_destroyed_snippet(filepath)]
 
         # Return our snippets
         return absolute_snippets
@@ -63,21 +94,21 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         # If we decided to destroy
         if index == 2:
             snippets = self.get_snippets()
-            for relative_filepath in snippets:
+            for filepath in snippets:
                 # Determine override content for the snippet
                 # DEV: We need ot use XML for `.tmSnippet` to avoid XML and snippet complaints
                 content = ''
-                if relative_filepath.endswith('.tmSnippet'):
+                if filepath.endswith(TM_SNIPPET_EXT):
                     content = EMPTY_TM_SNIPPET
 
                 # If there is no directory, then create it
-                full_dirpath = os.path.dirname(full_filepath)
-                if not os.path.isdir(full_dirpath):
-                    os.mkdir(full_dirpath)
+                dirpath = os.path.dirname(filepath)
+                if not os.path.isdir(dirpath):
+                    os.makedirs(dirpath)
 
                 # Output our new file (takes care of overrides for `Default` packages)
                 #   e.g. `fun` -> `function` for JavaScript
-                with open(full_filepath, 'w') as file:
+                with open(filepath, 'w') as file:
                     file.write(content)
             sublime.active_window().show_quick_panel(
                 ['%d snippets were destroyed.' % len(snippets)], noop)
