@@ -70,6 +70,11 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
                 # /home/todd/.config/sublime-text-3/Packages + .. + Packages/HTML/html.sublime-snippet
                 full_filepath = os.path.join(sublime.packages_path(), os.path.join('..', relative_filepath))
 
+                # If there is no directory, then create it
+                full_dirpath = os.path.dirname(full_filepath)
+                if not os.path.isdir(full_dirpath):
+                    os.mkdir(full_dirpath)
+
                 # Output our new file (takes care of overrides for `Default` packages)
                 #   e.g. `fun` -> `function` for JavaScript
                 with open(full_filepath, 'w') as file:
