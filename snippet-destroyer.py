@@ -31,15 +31,12 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         snippets = (sublime.find_resources(sublime_snippet_glob) +
                     sublime.find_resources(sublime_completions_glob) +
                     sublime.find_resources(tm_snippet_glob))
-        # TODO: Remove dev filter
-        snippets = [snippet for snippet in snippets if snippet == 'Packages/HTML/html.sublime-snippet']
         return snippets
 
     def run(self):
         """Destroy every .sublime-snippet, .sublime-completions, and .tmSnippet file in Packages folder"""
         # Find all of our snippets
         snippets = self.get_snippets()
-        print(snippets)
 
         # TODO: Get better count by checking if sizes are empty or exactly our plist one
         #   Maybe perform this filtering in `get_snippets`
