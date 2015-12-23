@@ -24,12 +24,15 @@ def noop(*args, **kwargs):
 class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
     def get_snippets(self):
         """Collect all .sublime-snippet, .sublime-completions, and .tmSnippet files in Packages folder"""
-        sublime_snippet_glob = '**/*.sublime-snippet'
-        sublime_completions_glob = '**/*.sublime-completions'
-        tm_snippet_glob = '**/*.tmSnippet'
+        # Find relative paths to snippets (e.g. 'Packages/HTML/html.sublime-snippet')
+        sublime_snippet_glob = '*.sublime-snippet'
+        sublime_completions_glob = '*.sublime-completions'
+        tm_snippet_glob = '*.tmSnippet'
         snippets = (sublime.find_resources(sublime_snippet_glob) +
                     sublime.find_resources(sublime_completions_glob) +
                     sublime.find_resources(tm_snippet_glob))
+        # TODO: Remove dev filter
+        snippets = [snippet for snippet in snippets if snippet == 'Packages/HTML/html.sublime-snippet']
         return snippets
 
     def run(self):
@@ -41,31 +44,35 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         # TODO: Get better count by checking if sizes are empty or exactly our plist one
         #   Maybe perform this filtering in `get_snippets`
         # # If there were no snippets found, let the user know
-        # active_window = sublime.active_window()
-        # if not snippets:
-        #     active_window.show_quick_panel(['No snippets were found.'], noop)
-        # # Otherwise, prompt the user about actions to take (no as default)
-        # else:
-        #     active_window.show_quick_panel(
-        #         ['%d snippets were found. Do you want to:' % len(snippets),
-        #             'Keep them.', 'Destroy them.'],
-        #         self.handle_decision)
+        active_window = sublime.active_window()
+        if not snippets:
+            active_window.show_quick_panel(['No snippets were found.'], noop)
+        # Otherwise, prompt the user about actions to take (no as default)
+        else:
+            active_window.show_quick_panel(
+                ['%d snippets were found. Do you want to:' % len(snippets),
+                    'Keep them.', 'Destroy them.'],
+                self.handle_decision)
 
     def handle_decision(self, index):
         """Decide to destroy or keep the snippet files"""
         # If we decided to destroy
         if index == 2:
             snippets = self.get_snippets()
-            for filepath in snippets:
+            for relative_filepath in snippets:
                 # Determine override content for the snippet
                 # DEV: We need ot use XML for `.tmSnippet` to avoid XML and snippet complaints
                 content = ''
-                if filepath.endswith('.tmSnippet'):
+                if relative_filepath.endswith('.tmSnippet'):
                     content = EMPTY_TM_SNIPPET
+
+                # Resolve full file path
+                # /home/todd/.config/sublime-text-3/Packages + .. + Packages/HTML/html.sublime-snippet
+                full_filepath = os.path.join(sublime.packages_path(), os.path.join('..', relative_filepath))
 
                 # Output our new file (takes care of overrides for `Default` packages)
                 #   e.g. `fun` -> `function` for JavaScript
-                with open(filepath, 'w') as file:
+                with open(full_filepath, 'w') as file:
                     file.write(content)
             sublime.active_window().show_quick_panel(
                 ['%d snippets were destroyed.' % len(snippets)], noop)
