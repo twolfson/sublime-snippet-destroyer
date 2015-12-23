@@ -15,6 +15,7 @@ EMPTY_TM_SNIPPET = '\n'.join([
     '</dict>',
     '</plist>',
 ])
+SUBLIME_SNIPPET_EXT = '.sublime-snippet'
 TM_SNIPPET_EXT = '.tmSnippet'
 
 
@@ -107,6 +108,12 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         if index == 2:
             snippets = self.get_snippets()
             for filepath in snippets:
+                # If this is a Sublime Text snippet and we are in Sublime Text 2, then delete the file
+                # DEV: We must delete the file since empty content nor useless XML raise alerts in Sublime Text 2
+                if filepath.endswith(SUBLIME_SNIPPET_EXT) and not hasattr(sublime, 'find_resources'):
+                    os.unlink(filepath)
+                    continue
+
                 # Determine override content for the snippet
                 # DEV: We need ot use XML for `.tmSnippet` to avoid XML and snippet complaints
                 content = ''
