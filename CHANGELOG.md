@@ -1,4 +1,6 @@
 # sublime-snippet-destroyer changelog
+1.0.0 - Moved to override by default system. Fixes #3
+
 0.2.2 - Fixed up lint errors
 
 0.2.1 - Added foundry for release
