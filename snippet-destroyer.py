@@ -15,7 +15,6 @@ EMPTY_TM_SNIPPET = '\n'.join([
     '</dict>',
     '</plist>',
 ])
-SUBLIME_SNIPPET_EXT = '.sublime-snippet'
 TM_SNIPPET_EXT = '.tmSnippet'
 
 
@@ -48,8 +47,7 @@ def is_destroyed_snippet(filepath):
         return True
 
     # Otherwise, if it's a snippet and its content are our empty content, then it's destroy
-    # DEV: In Sublime Text 2, `.sublime-snippet` must be non-empty where as ST3 only requires `.tmSnippet`
-    if filepath.endswith(SUBLIME_SNIPPET_EXT) or filepath.endswith(TM_SNIPPET_EXT):
+    if filepath.endswith(TM_SNIPPET_EXT):
         with open(filepath, 'r') as file:
             if file.read() == EMPTY_TM_SNIPPET:
                 return True
@@ -110,9 +108,9 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
             snippets = self.get_snippets()
             for filepath in snippets:
                 # Determine override content for the snippet
-                # DEV: We need to use XML for snippets to avoid XML and snippet content complaints
+                # DEV: We need ot use XML for `.tmSnippet` to avoid XML and snippet complaints
                 content = ''
-                if filepath.endswith(SUBLIME_SNIPPET_EXT) or filepath.endswith(TM_SNIPPET_EXT):
+                if filepath.endswith(TM_SNIPPET_EXT):
                     content = EMPTY_TM_SNIPPET
 
                 # If there is no directory, then create it
