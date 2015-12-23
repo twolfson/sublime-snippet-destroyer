@@ -18,6 +18,17 @@ TM_SNIPPET_EXT = '.tmSnippet'
 
 
 # Define our plugin helpers
+def find_resources(glob):
+    # If we have Sublime's find_resources, then use it
+    if hasattr(sublime, 'find_resources'):
+        return sublime.find_resources(glob)
+    # Otherwise, we are on Sublime Text 2 which uses directories
+    #   so let's search them via `glob`
+    else:
+        packages_glob = os.path.join(sublime.packages_path(), '**', glob)
+        return glob.glob(packages_glob)
+
+
 def is_destroyed_snippet(filepath):
     """
     Determine is a file is a destroyed snippet or not
@@ -56,9 +67,9 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         sublime_snippet_glob = '*.sublime-snippet'
         sublime_completions_glob = '*.sublime-completions'
         tm_snippet_glob = '*.tmSnippet'
-        relative_snippets = (sublime.find_resources(sublime_snippet_glob) +
-                             sublime.find_resources(sublime_completions_glob) +
-                             sublime.find_resources(tm_snippet_glob))
+        relative_snippets = (find_resources(sublime_snippet_glob) +
+                             find_resources(sublime_completions_glob) +
+                             find_resources(tm_snippet_glob))
 
         # Resolve full file path
         # /home/todd/.config/sublime-text-3/Packages + .. + Packages/HTML/html.sublime-snippet
