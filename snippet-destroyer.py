@@ -31,20 +31,20 @@ def is_destroyed_snippet(filepath):
     :return: Indicator if the file is a destroyed snippet (true if it is, false otherwise)
     :rtype: bool
     """
+    # If it's a `.tmSnippet`, we are on ST3, and it's folder has been created, then it's destroyed
+    # DEV: When we create an "empty" plist file, this doesn't delete the `tmSnippet`
+    #   However, making an empty directory magically does
+    if (filepath.endswith(TM_SNIPPET_EXT) and
+            hasattr(sublime, 'find_resources') and
+            os.path.exists(os.path.dirname(filepath))):
+        return True
+
     # If the override file doesn't exist, then it's not overridden
     if not os.path.exists(filepath):
         return False
 
     # If the file is empty, then it's definitely destroyed
     if os.path.getsize(filepath) == 0:
-        return True
-
-    # Otherwise, if it's a `.tmSnippet`, we are on ST3, and it's folder has been created, then it's destroyed
-    # DEV: When we create an "empty" plist file, this doesn't delete the `tmSnippet`
-    #   However, making an empty directory magically does
-    if (filepath.endswith(TM_SNIPPET_EXT) and
-            hasattr(sublime, 'find_resources') and
-            os.path.exists(os.path.dirname(filepath))):
         return True
 
     # Otherwise, it's not a destroyed snippet
@@ -117,12 +117,12 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
                     if is_sublime_text_2:
                         os.unlink(filepath)
                         continue
-                    # Otherwise, create a direcotry
+                    # Otherwise, create a directory
                     # DEV: On Sublime Text 3, an "empty" plist lets the snippet persist but an empty directory doesn't
                     else:
                         if not os.path.isdir(dirpath):
                             os.makedirs(dirpath)
-                            continue
+                        continue
 
                 # If there is no directory, then create it
                 if not os.path.isdir(dirpath):
