@@ -24,15 +24,8 @@ import os; path=sublime.packages_path(); (os.makedirs(path) if not os.path.exist
 
 Packages can be uninstalled via "Package Control: Remove Package" via the command pallete, `ctrl+shift+p` on Windows/Linux, `command+shift+p` on Mac.
 
-## Sublime Text 3 setup
-Currently, Sublime Text 2 will work out of the box. However, for Sublime Text 3 we must extract all its packages first. This can be done via the "Extract Sublime Package: Extract all packages" command in the "ExtractSublimePackage" module.
-
-https://github.com/SublimeText/ExtractSublimePackage
-
 ## Usage
 `sublime-snippet-destroyer` provides a new command to the command pallete **"Destroy all snippets!!"**
-
-If you are using Sublime Text 3, then please see [Sublime Text 3 setup](#sublime-text-3-setup) first.
 
 When this is ran, it finds all `.sublime-snippet` + `.sublime-completions` + `.tmSnippet` files in your [Sublime Text][] Packages directory.
 
