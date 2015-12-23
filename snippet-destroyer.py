@@ -28,19 +28,26 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
         sublime_snippet_glob = '*.sublime-snippet'
         sublime_completions_glob = '*.sublime-completions'
         tm_snippet_glob = '*.tmSnippet'
-        snippets = (sublime.find_resources(sublime_snippet_glob) +
-                    sublime.find_resources(sublime_completions_glob) +
-                    sublime.find_resources(tm_snippet_glob))
-        return snippets
+        relative_snippets = (sublime.find_resources(sublime_snippet_glob) +
+                             sublime.find_resources(sublime_completions_glob) +
+                             sublime.find_resources(tm_snippet_glob))
+
+        # Resolve full file path
+        # /home/todd/.config/sublime-text-3/Packages + .. + Packages/HTML/html.sublime-snippet
+        absolute_snippets = [
+            os.path.join(sublime.packages_path(), os.path.join('..', relative_snippet))
+            for relative_snippet in relative_snippets
+        ]
+
+        # Return our snippets
+        return absolute_snippets
 
     def run(self):
         """Destroy every .sublime-snippet, .sublime-completions, and .tmSnippet file in Packages folder"""
         # Find all of our snippets
         snippets = self.get_snippets()
 
-        # TODO: Get better count by checking if sizes are empty or exactly our plist one
-        #   Maybe perform this filtering in `get_snippets`
-        # # If there were no snippets found, let the user know
+        # If there were no snippets found, let the user know
         active_window = sublime.active_window()
         if not snippets:
             active_window.show_quick_panel(['No snippets were found.'], noop)
@@ -62,10 +69,6 @@ class SnippetDestroyerDeleteAllCommand(sublime_plugin.ApplicationCommand):
                 content = ''
                 if relative_filepath.endswith('.tmSnippet'):
                     content = EMPTY_TM_SNIPPET
-
-                # Resolve full file path
-                # /home/todd/.config/sublime-text-3/Packages + .. + Packages/HTML/html.sublime-snippet
-                full_filepath = os.path.join(sublime.packages_path(), os.path.join('..', relative_filepath))
 
                 # If there is no directory, then create it
                 full_dirpath = os.path.dirname(full_filepath)
