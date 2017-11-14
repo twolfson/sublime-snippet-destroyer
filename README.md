@@ -36,12 +36,12 @@ If snippets are found, you will be prompted to confirm in their deletion. If you
 There is currently one section we cannot erase which is any plugin with a `on_query_completions` method (e.g. `CSS` and `HTML`). These are baked in to `EventListener` commands and cannot be scrubbed easily. As a result, you must delete these files manually.
 
 ## Donating
-Support this project and [others by twolfson][gittip] via [gittip][].
+Support this project and [others by twolfson][twolfson-projects] via [donations][twolfson-support-me].
 
-[![Support via Gittip][gittip-badge]][gittip]
+<http://twolfson.com/support-me>
 
-[gittip-badge]: https://rawgithub.com/twolfson/gittip-badge/master/dist/gittip.png
-[gittip]: https://www.gittip.com/twolfson/
+[twolfson-projects]: http://twolfson.com/projects
+[twolfson-support-me]: http://twolfson.com/support-me
 
 ## Unlicense
 As of Nov 20 2013, Todd Wolfson has released this repository and its contents to the public domain.
