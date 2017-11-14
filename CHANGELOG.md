@@ -1,4 +1,6 @@
 # sublime-snippet-destroyer changelog
+1.0.2 - Replaced Gittip with support me page
+
 1.0.1 - Repaired "empty" .tmSnippet not hiding snippets for Sublime Text 3
 
 1.0.0 - Moved to override by default system. Fixes #3
